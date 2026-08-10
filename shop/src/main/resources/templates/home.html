@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Spring</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .container {
+            width: 900px;
+            margin: 80px auto;
+            padding: 50px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: 42px;
+        }
+
+        p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        .buttons {
+            margin-top: 32px;
+        }
+
+        .buttons a {
+            display: inline-block;
+            margin-right: 12px;
+            padding: 14px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .secondary {
+            background: #eef2ff;
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Hello Spring</h1>
+    <p>회원 등록과 회원 목록 조회를 할 수 있는 Spring Boot 예제입니다.</p>
+
+    <div class="buttons">
+        <a class="primary" href="/members/new">회원 등록</a>
+        <a class="secondary" href="/members">회원 목록</a>
+    </div>
+</div>
+</body>
+</html>
