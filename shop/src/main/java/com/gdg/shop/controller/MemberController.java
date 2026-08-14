@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
-//@Controller
 // @RestController는 @Controller + @ResponseBody 역할을 한다.
-// return 값을 뷰 이름으로 보지 않고 HTTP 응답 body로 변환해서 클라이언트에게 보낸다.
 @RestController
 
 // @RequiredArgsConstructor는 final 필드를 받는 생성자를 Lombok이 자동으로 만들어준다.
 // 여기서는 MemberService를 생성자 주입으로 받게 해준다.
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 
 // 이 컨트롤러의 공통 URL을 /members로 묶는다.
 // 아래 @GetMapping, @PostMapping 등은 전부 /members 뒤에 붙는 경로가 된다.
-@ResponseBody
 @RequestMapping("/members")
+
+// return 값을 뷰 이름으로 보지 않고 HTTP 응답 body로 변환해서 클라이언트에게 보낸다.
+@ResponseBody
 public class MemberController {
 
     private final MemberService memberService;
@@ -39,7 +39,7 @@ public class MemberController {
         // ResponseEntity<Void>의 Void는 응답 body가 없다는 뜻이다.
         // created(uri)는 201 Created 상태 코드와 Location 헤더를 만든다.
         // build()는 body 없이 응답 객체를 완성한다.
-        return ResponseEntity.created(URI.create("/members" + memberId)).build();
+        return ResponseEntity.created(URI.create("/members/" + memberId)).build();
     }
 
     @GetMapping
@@ -47,7 +47,7 @@ public class MemberController {
     // ResponseEntity<List<Member>>는 응답 body 전체가 회원 목록 타입이라는 서버 내부의 타입 표시다.
     // HTTP에는 List<Member>라는 Java 타입명이 실려 가지 않고, 실제로는 JSON 배열로 변환되어 나간다.
     public ResponseEntity<List<Member>> getAllMembers() {
-        List<Member> members = memberService.getAllMembers();
+        List<Member> members = memberService.findAllMembers();
 
         // members는 서비스에서 가져온 회원 목록을 담은 변수다.
         // ok(members)는 200 OK 상태 코드와 members를 응답 body로 보내겠다는 뜻이다.
@@ -88,3 +88,16 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 }
+
+// [질문 정리 1] Controller는 HTTP 요청이 처음 들어오는 입구이다.
+// /members로 들어오는 POST, GET, PATCH, DELETE 요청을 각각 Java 메서드에 연결한다.
+//
+// [질문 정리 2] @RequestBody는 요청 body의 JSON을 MemberCreateRequest나 MemberUpdateRequest 같은 DTO 객체로 변환한다.
+// Postman에서 raw + JSON을 선택해야 Content-Type이 application/json이 되어 Spring이 JSON으로 해석할 수 있다.
+// raw + Text 상태로 보내면 Content-Type이 text/plain이 되어 415 Unsupported Media Type이 발생할 수 있다.
+//
+// [질문 정리 3] ResponseEntity.created(...).build()는 201 Created 응답을 만든다.
+// build()만 호출하면 응답 body는 비어 있고, 새로 생성된 리소스 위치는 Location 헤더로 알려주는 구조가 된다.
+//
+// [질문 정리 4] Entity인 Member를 그대로 응답하면 password 같은 내부 필드가 JSON에 포함될 수 있다.
+// 실무에서는 조회 응답용 DTO를 따로 만들어 필요한 값만 내려보내는 방식이 더 안전하다.

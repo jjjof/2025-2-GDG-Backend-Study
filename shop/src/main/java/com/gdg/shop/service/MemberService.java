@@ -35,8 +35,8 @@ public class MemberService {
         Member member = new Member(
                 request.getLoginId(),
                 request.getPassword(),
-                request.getAddress(),
-                request.getPhoneNumber()
+                request.getPhoneNumber(),
+                request.getAddress()
         );
 
         memberRepository.save(member);
@@ -85,3 +85,15 @@ public class MemberService {
         memberRepository.deleteById(id);
     }
 }
+
+// [질문 정리 1] Service 계층은 Controller에서 받은 요청을 실제 비즈니스 로직으로 처리하는 곳이다.
+// 회원 생성에서는 중복 loginId 확인, Member Entity 생성, Repository 저장 호출을 담당한다.
+//
+// [질문 정리 2] 회원 등록 시 Hibernate 로그에 select가 먼저 보이는 이유는 findByLoginId로 중복 회원을 확인하기 때문이다.
+// 같은 loginId가 없을 때만 insert가 실행되므로 "select 후 insert" 흐름은 현재 로직상 정상이다.
+//
+// [질문 정리 3] new Member(...)를 호출할 때 생성자 매개변수 순서와 전달 값의 순서가 반드시 일치해야 한다.
+// 순서가 어긋나면 컴파일 에러는 나지 않지만 phoneNumber와 address 같은 값이 서로 바뀌어 저장될 수 있다.
+//
+// [질문 정리 4] @Transactional은 하나의 서비스 작업을 트랜잭션 단위로 묶는다.
+// 조회만 하는 메서드는 readOnly = true를 붙이면 변경 작업이 없다는 의도를 표현할 수 있다.
