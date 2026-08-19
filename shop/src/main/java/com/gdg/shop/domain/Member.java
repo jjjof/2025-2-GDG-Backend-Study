@@ -62,6 +62,10 @@ public class Member {
             this.address = address;
         }
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
 
 // [질문 정리 1] Member는 JPA Entity이므로 DB의 members 테이블과 매핑되는 도메인 객체이다.
