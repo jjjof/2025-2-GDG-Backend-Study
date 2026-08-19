@@ -4,9 +4,9 @@ import com.gdg.shop.domain.Member;
 import com.gdg.shop.dto.MemberCreateRequest;
 import com.gdg.shop.dto.MemberUpdateRequest;
 import com.gdg.shop.service.MemberService;
-import com.gdg.shop.service.MemberServiceImple;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,10 @@ public class MemberController {
 
     @PostMapping
     @Operation(summary = "회원 생성", description = "새로운 회원을 등록합니다.")
-    @ApiResponse(responseCode = "400", description = "잘못된 요청 (유효성 검사 실패 또는 중복된 로그인 아이디)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "유효성 검사 실패 또는 중복된 로그인 아이디")
+    })
     public ResponseEntity<Void> createMember(@RequestBody @Valid MemberCreateRequest request){
         Long memberId = memberService.createMember(request);
 
@@ -35,6 +38,8 @@ public class MemberController {
     }
 
     @GetMapping
+    @Operation(summary = "전체 회원 조회", description = "등록된 모든 회원을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "전체 회원 조회 성공")
     public ResponseEntity<List<Member>> getAllMembers() {
         List<Member> members = memberService.findAllMembers();
 
@@ -42,6 +47,11 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
+    @Operation(summary = "회원 단건 조회", description = "회원 ID로 회원 한 명을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+    })
     public ResponseEntity<Member> getMembers(@PathVariable Long memberId) {
         Member member = memberService.getMemberById(memberId);
 
@@ -49,6 +59,12 @@ public class MemberController {
     }
 
     @PatchMapping("/{memberId}")
+    @Operation(summary = "회원 정보 수정", description = "회원의 비밀번호, 전화번호 또는 주소를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "유효성 검사 실패"),
+            @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+    })
     public ResponseEntity<Void> updateMember(@PathVariable Long memberId,
                                              @RequestBody @Valid MemberUpdateRequest request){
         memberService.updateMember(memberId, request);
@@ -57,6 +73,11 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
+    @Operation(summary = "회원 삭제", description = "회원 ID에 해당하는 회원을 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "회원 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")
+    })
     public ResponseEntity<Void> deleteMember(@PathVariable Long memberId){
         memberService.deleteMember(memberId);
 

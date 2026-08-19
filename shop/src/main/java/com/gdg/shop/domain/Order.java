@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,17 +29,32 @@ public class Order{
     @Column(name = "order_total_price")
     private int totalPrice;
 
-    @Column(name = "order_cash_amount")
-    private int cashAmount;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "order_status", length = 25)
-    private String status;
+    private OrderStatus status;
 
-    public Order(Member member, LocalDateTime orderDate, int totalPrice, int cashAmount, String status) {
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    public Order(Member member, LocalDateTime orderDate) {
         this.member = member;
         this.orderDate = orderDate;
-        this.totalPrice = totalPrice;
-        this.cashAmount = cashAmount;
+        this.totalPrice = 0;
+        this.status = OrderStatus.ORDERED;
+    }
+
+    public void updateStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.assignOrder(this);
+    }
+
+    public void calculateTotalPrice() {
+        this.totalPrice = orderItems.stream()
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
     }
 }
