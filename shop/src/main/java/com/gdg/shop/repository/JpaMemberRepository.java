@@ -3,11 +3,13 @@ package com.gdg.shop.repository;
 import com.gdg.shop.domain.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
+@Primary
 public class JpaMemberRepository implements MemberRepository {
 
     @PersistenceContext

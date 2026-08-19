@@ -1,11 +1,23 @@
 package com.gdg.shop.dto;
 
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
+
+import static com.gdg.shop.common.message.ErrorMessage.ADDRESS_SIZE;
+import static com.gdg.shop.common.message.ErrorMessage.PASSWORD_SIZE;
+import static com.gdg.shop.common.message.ErrorMessage.PHONE_NUMBER_PATTERN;
 
 @Getter
 public class MemberUpdateRequest {
+
+    @Size(min=8,max=20,message=PASSWORD_SIZE)
     private String password;
+
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = PHONE_NUMBER_PATTERN)
     private String phoneNumber;
+
+    @Size(min=1,max=55,message=ADDRESS_SIZE)
     private String address;
 
     public MemberUpdateRequest(String password, String phoneNumber, String address) {

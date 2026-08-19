@@ -1,5 +1,8 @@
 package com.gdg.shop.service;
 
+import com.gdg.shop.common.exception.BadRequestException;
+import com.gdg.shop.common.exception.NotFoundException;
+import com.gdg.shop.common.message.ErrorMessage;
 import com.gdg.shop.domain.Member;
 import com.gdg.shop.dto.MemberCreateRequest;
 import com.gdg.shop.dto.MemberUpdateRequest;
@@ -20,14 +23,10 @@ public class MemberServiceImple implements MemberService{
     @Override
     @Transactional
     public Long createMember(MemberCreateRequest request){
-        // 컨트롤러 -> 서비스 호출은 HTTP 요청이 아니라 Java 메서드 호출이다.
-        // HTTP는 보통 클라이언트와 컨트롤러 사이에서만 오간다.
         Member existingMember = memberRepository.findByLoginId(request.getLoginId());
 
         if (existingMember != null){
-            // RuntimeException은 너무 넓은 예외 타입이다.
-            // 실무에서는 DuplicateLoginIdException처럼 상황을 드러내는 구체적인 예외가 더 좋다.
-            throw new RuntimeException("이미 존재하는 로그인 아이디입니다: " + request.getLoginId());
+            throw new BadRequestException(ErrorMessage.Member_Already_Exists + ": " + request.getLoginId());
         }
 
         Member member = new Member(
@@ -39,7 +38,6 @@ public class MemberServiceImple implements MemberService{
 
         memberRepository.save(member);
 
-        // 컨트롤러는 이 id로 201 Created의 Location 헤더를 만들 수 있다.
         return member.getId();
     }
 
@@ -55,9 +53,7 @@ public class MemberServiceImple implements MemberService{
         Member member = memberRepository.findById(id);
 
         if (member == null) {
-            // "회원을 찾을 수 없음"은 404 Not Found와 연결하기 좋은 비즈니스 예외다.
-            // RuntimeException 대신 MemberNotFoundException 같은 별도 타입을 만들면 예외 처리가 명확해진다.
-            throw new RuntimeException("회원을 찾을 수 없습니다.");
+            throw new NotFoundException(ErrorMessage.Member_Not_Found);
         }
 
         return member;
@@ -69,10 +65,21 @@ public class MemberServiceImple implements MemberService{
         Member member = memberRepository.findById(id);
 
         if (member == null) {
-            throw new RuntimeException("회원을 찾을 수 없습니다.");
+            throw new NotFoundException(ErrorMessage.Member_Not_Found);
         }
 
-        member.updateInfo(request.getPassword(), request.getPhoneNumber(), request.getAddress());
+        String password = (request.getPassword() != null)
+                ? request.getPassword()
+                : member.getPassword();
+        String phoneNumber = (request.getPhoneNumber() != null)
+                ? request.getPhoneNumber()
+                : member.getPhoneNumber();
+        String address = (request.getAddress() != null)
+                ? request.getAddress()
+                : member.getAddress();
+
+        //업데이트
+        member.updateInfo(password, phoneNumber, address);
     }
 
     @Override
@@ -81,13 +88,20 @@ public class MemberServiceImple implements MemberService{
         Member member = memberRepository.findById(id);
 
         if (member == null) {
-            throw new RuntimeException("회원을 찾을 수 없습니다.");
+            throw new NotFoundException(ErrorMessage.Member_Not_Found);
         }
 
         memberRepository.deleteById(id);
     }
 }
 
+// 컨트롤러 -> 서비스 호출은 HTTP 요청이 아니라 Java 메서드 호출이다.
+// HTTP는 보통 클라이언트와 컨트롤러 사이에서만 오간다.
+// RuntimeException은 너무 넓은 예외 타입이다.
+// 실무에서는 DuplicateLoginIdException처럼 상황을 드러내는 구체적인 예외가 더 좋다.
+// 컨트롤러는 이 id로 201 Created의 Location 헤더를 만들 수 있다.
+// "회원을 찾을 수 없음"은 404 Not Found와 연결하기 좋은 비즈니스 예외다.
+// RuntimeException 대신 MemberNotFoundException 같은 별도 타입을 만들면 예외 처리가 명확해진다.
 // [질문 정리 1] Service 계층은 Controller에서 받은 요청을 실제 비즈니스 로직으로 처리하는 곳이다.
 // 회원 생성에서는 중복 loginId 확인, Member Entity 생성, Repository 저장 호출을 담당한다.
 //
